@@ -1,0 +1,5 @@
+Comand to up table use goose :
+
+goose -dir ./migrations mysql "root:@tcp(127.0.0.1:3306)/next_gin_geoabsent" up
+
+copy to your terminal and make sure your in the project root directory
