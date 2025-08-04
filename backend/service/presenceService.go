@@ -23,6 +23,42 @@ func (s *presenceservice) GetPresenceByEmail(email string) (*dto.PresenceRespons
 		return nil, err
 	}
 
+	// 1. Looop Monly Summary
+	var summary dto.MontlyPresenceSummary
+
+	for _, v := range presence {
+		switch v.PresentStatus.StatusName {
+		case "hadir":
+			summary.TotalHadir++
+		case "izin":
+			summary.TotalIzin++
+		case "sakit":
+			summary.TotalSakit++
+		case "terlambat":
+			summary.TotalTerlambat++
+		}
+	}
+
+	// Loop 2 Montly Sumary
+	todaypresence, err := s.repo.QueryTodayPresenceByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	presenceToday := dto.PresenceToDay{
+		Morning:  "Belum Absen",
+		AfterNon: "Belum Absen",
+	}
+
+	if todaypresence != nil {
+		if todaypresence.TimeIn != nil && *todaypresence.TimeIn != "" {
+			presenceToday.Morning = "Sudah Absen"
+		}
+		if todaypresence.TimeOut != nil && *todaypresence.TimeOut != "" {
+			presenceToday.AfterNon = "Sudah Absen"
+		}
+	}
+
+	// Loop tiga
 	var presenceAll []dto.PresencesAll
 	for _, v := range presence {
 		presenceAll = append(presenceAll, dto.PresencesAll{
@@ -35,8 +71,10 @@ func (s *presenceservice) GetPresenceByEmail(email string) (*dto.PresenceRespons
 	}
 
 	result := &dto.PresenceResponse{
-		Name:     presence[0].User.Name,
-		Presence: presenceAll,
+		Name:                  presence[0].User.Name,
+		MontlyPresenceSummary: summary,
+		PresenceToday:         presenceToday,
+		Presence:              presenceAll,
 	}
 
 	return result, nil
