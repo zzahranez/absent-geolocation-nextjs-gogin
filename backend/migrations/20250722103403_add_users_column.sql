@@ -13,16 +13,11 @@ CREATE TABLE users (
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE TABLE profiles (
+CREATE TABLE presence_status (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
-    bio TEXT,
-    avatar VARCHAR(255),
-    phone VARCHAR(20),
-    address TEXT,
+    status_name VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 
@@ -38,6 +33,21 @@ CREATE TABLE presences (
     latitude_longtitude_out VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (status_id) REFERENCES presence_status(id) ON DELETE SET NULL
+);
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE TABLE profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    bio TEXT,
+    avatar VARCHAR(255),
+    phone VARCHAR(20),
+    address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 -- +goose StatementEnd
@@ -45,11 +55,15 @@ CREATE TABLE presences (
 -- +goose Down
 
 -- +goose StatementBegin
+DROP TABLE IF EXISTS profiles;
+-- +goose StatementEnd
+
+-- +goose StatementBegin
 DROP TABLE IF EXISTS presences;
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS presence_status;
 -- +goose StatementEnd
 
 -- +goose StatementBegin

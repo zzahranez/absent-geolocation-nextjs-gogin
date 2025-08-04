@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"gin/dto/authdto"
+	"gin/dto"
 	"gin/service"
 	"net/http"
 
@@ -21,7 +21,7 @@ func NewAuthController(se service.AuthService) AuthController {
 }
 
 func (c *authcontroller) Login(ctx *gin.Context) {
-	var req authdto.RequestLogin
+	var req dto.LoginRequest
 
 	if err := ctx.ShouldBindBodyWithJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

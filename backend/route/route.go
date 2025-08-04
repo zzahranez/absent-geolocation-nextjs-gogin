@@ -11,12 +11,17 @@ type Routes interface {
 }
 
 type routes struct {
-	authController controller.AuthController
+	authController     controller.AuthController
+	presenceController controller.PresenceController
 }
 
-func NewRoutes(auth controller.AuthController) Routes {
+func NewRoutes(
+	auth controller.AuthController,
+	presence controller.PresenceController,
+) Routes {
 	return &routes{
-		authController: auth,
+		authController:     auth,
+		presenceController: presence,
 	}
 }
 
@@ -27,9 +32,8 @@ func (r *routes) SetupRoutes(router *gin.Engine) {
 		auth.POST("/login", r.authController.Login)
 	}
 
-	// Example: another module route group
-	// user := router.Group("/users")
-	// {
-	// 	user.GET("/", r.userController.GetAllUsers)
-	// }
+	presence := router.Group("/presence")
+	{
+		presence.GET("", r.presenceController.GetPresenceByEmail)
+	}
 }

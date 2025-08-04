@@ -2,12 +2,12 @@ package service
 
 import (
 	"errors"
-	"gin/dto/authdto"
+	"gin/dto"
 	"gin/repository"
 )
 
 type AuthService interface {
-	Login(req *authdto.RequestLogin) (*authdto.ResponseLogin, error)
+	Login(req *dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type authservice struct {
@@ -18,7 +18,7 @@ func NewAuthService(re repository.AuhtRepository) AuthService {
 	return &authservice{repo: re}
 }
 
-func (s *authservice) Login(req *authdto.RequestLogin) (*authdto.ResponseLogin, error) {
+func (s *authservice) Login(req *dto.LoginRequest) (*dto.LoginResponse, error) {
 	users, err := s.repo.QueryLogin(req.Email)
 	if err != nil {
 		return nil, errors.New("email tidak ditemukan")
@@ -27,7 +27,7 @@ func (s *authservice) Login(req *authdto.RequestLogin) (*authdto.ResponseLogin, 
 	if users.Password != req.Password {
 		return nil, errors.New("invalid email or password")
 	}
-	return &authdto.ResponseLogin{
+	return &dto.LoginResponse{
 		Name:  users.Name,
 		Email: users.Email,
 	}, nil
