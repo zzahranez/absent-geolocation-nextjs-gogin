@@ -1,38 +1,54 @@
 package controller
 
 import (
+	"gin/dto"
 	"gin/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type PresenceController interface {
-	GetPresenceByEmail(ctx *gin.Context)
+	CreatePresence(ctx *gin.Context)
 }
 
 type presencecontroller struct {
 	service service.PresenceService
 }
 
-func NewPresenceController(service service.PresenceService) PresenceController {
-	return &presencecontroller{service: service}
+func NewPresenceController(serv service.PresenceService) PresenceController {
+	return &presencecontroller{
+		service: serv,
+	}
 }
 
-func (c *presencecontroller) GetPresenceByEmail(ctx *gin.Context) {
+func (c *presencecontroller) CreatePresence(ctx *gin.Context) {
 	userLogin := "jack@gmail.com"
 
-	presence, err := c.service.GetPresenceByEmail(userLogin)
-	if err != nil {
+	var req dto.PresenceRequest
+	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(400, gin.H{
 			"status":  false,
+			"message": "request data is nothing happen",
 			"error":   err.Error(),
-			"message": "Terjadi kesalahan",
 		})
+
 		return
 	}
+
+	presence, err := c.service.HandleCreatePresence(userLogin, req)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"status":  false,
+			"message": "can't create presence",
+			"error":   err.Error(),
+		})
+
+		return
+	}
+
 	ctx.JSON(200, gin.H{
 		"status":  true,
-		"message": "Data berhasil ditemukan",
+		"message": "presence has been create successfully",
 		"data":    presence,
 	})
 }

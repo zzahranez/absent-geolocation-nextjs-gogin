@@ -9,14 +9,22 @@ import (
 )
 
 func InjecRepository(db *gorm.DB) Routes {
+	// Users
+	usersRepo := repository.NewUsersRepository(db)
+
 	authRepo := repository.NewAuthRepository(db)
 	authService := service.NewAuthService(authRepo)
 	authController := controller.NewAuthController(authService)
 
-	//Presence Page
-	presenceRepo := repository.NewPresenceRepository(db)
-	presenceService := service.NewPresenceService(presenceRepo)
-	presenceController := controller.NewPresenceController(presenceService)
+	//Presence History
+	presenceHistoryRepo := repository.NewPresenceHistoryRepository(db)
+	presenceHistoryService := service.NewPresenceHistoryService(presenceHistoryRepo)
+	presenceHistoryController := controller.NewPresenceHistoryController(presenceHistoryService)
 
-	return NewRoutes(authController, presenceController)
+	// Presence
+	presenceRepo := repository.NewPresenceRepository(db)
+	presenceSerice := service.NewPresenceService(presenceRepo, usersRepo)
+	presenceController := controller.NewPresenceController(presenceSerice)
+
+	return NewRoutes(authController, presenceHistoryController, presenceController)
 }

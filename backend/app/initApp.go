@@ -2,6 +2,7 @@ package app
 
 import (
 	"gin/database"
+	"gin/helper"
 	"gin/route"
 	"log"
 	"time"
@@ -33,6 +34,7 @@ func InitApp() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	helper.TestHaversineFormula()
 	//injecRepository And Route SetUp
 	routes := route.InjecRepository(db)
 	routes.SetupRoutes(r)

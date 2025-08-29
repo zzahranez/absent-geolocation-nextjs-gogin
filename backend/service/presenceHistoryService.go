@@ -3,40 +3,48 @@ package service
 import (
 	"gin/dto"
 	"gin/repository"
+	"time"
 )
 
-type PresenceService interface {
+type PresenceHistoryService interface {
 	GetPresenceByEmail(email string) (*dto.PresenceResponse, error)
 }
 
-type presenceservice struct {
-	repo repository.PresenceRepository
+type presencehistoryservice struct {
+	repo repository.PresenceHistoryRepository
 }
 
-func NewPresenceService(repo repository.PresenceRepository) PresenceService {
-	return &presenceservice{repo: repo}
+func NewPresenceHistoryService(repo repository.PresenceHistoryRepository) PresenceHistoryService {
+	return &presencehistoryservice{repo: repo}
 }
 
-func (s *presenceservice) GetPresenceByEmail(email string) (*dto.PresenceResponse, error) {
-	presence, err := s.repo.QueryPresenceByEmail(email)
+func (s *presencehistoryservice) GetPresenceByEmail(email string) (*dto.PresenceResponse, error) {
+	// time variable
+	now := time.Now()
+	currentmonth := int(now.Month())
+	currentYear := now.Year()
+
+	presence, err := s.repo.QueryPresenceByEmail(email, currentmonth, currentYear)
 	if err != nil {
 		return nil, err
 	}
 
 	// 1. Looop Monly Summary
 	var summary dto.MontlyPresenceSummary
-
 	for _, v := range presence {
-		switch v.PresentStatus.StatusName {
-		case "hadir":
+		switch v.PresenceStatus.StatusName {
+		case "Hadir":
 			summary.TotalHadir++
-		case "izin":
+		case "Izin":
 			summary.TotalIzin++
-		case "sakit":
+		case "Sakit":
 			summary.TotalSakit++
-		case "terlambat":
+		}
+
+		if v.Is_late == true {
 			summary.TotalTerlambat++
 		}
+
 	}
 
 	// Loop 2 Montly Sumary
@@ -50,7 +58,7 @@ func (s *presenceservice) GetPresenceByEmail(email string) (*dto.PresenceRespons
 	}
 
 	if todaypresence != nil {
-		if todaypresence.TimeIn != nil && *todaypresence.TimeIn != "" {
+		if todaypresence.TimeIn != "" {
 			presenceToday.Morning = "Sudah Absen"
 		}
 		if todaypresence.TimeOut != nil && *todaypresence.TimeOut != "" {
@@ -61,12 +69,20 @@ func (s *presenceservice) GetPresenceByEmail(email string) (*dto.PresenceRespons
 	// Loop tiga
 	var presenceAll []dto.PresencesAll
 	for _, v := range presence {
+
+		var latLongOut string
+		if v.LatitudeLongitudeOut != nil {
+			latLongOut = *v.LatitudeLongitudeOut
+		} else {
+			latLongOut = "" // atau kasih default value
+		}
 		presenceAll = append(presenceAll, dto.PresencesAll{
 			PresenceDate:           v.PresenceDate,
-			TimeIn:                 v.TimeIn,
+			TimeIn:                 &v.TimeIn,
 			TimeOut:                v.TimeOut,
-			LatitudeLongTitudeIn:   *v.LatitudeLongitudeIn,
-			LatitudeLongTitudeeOut: *v.LatitudeLongitudeOut,
+			IsLate:                 v.Is_late,
+			LatitudeLongTitudeIn:   v.LatitudeLongitudeIn,
+			LatitudeLongTitudeeOut: latLongOut,
 		})
 	}
 

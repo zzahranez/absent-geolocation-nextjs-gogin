@@ -11,17 +11,20 @@ type Routes interface {
 }
 
 type routes struct {
-	authController     controller.AuthController
-	presenceController controller.PresenceController
+	authController            controller.AuthController
+	presenceHistoryController controller.PresenceHistoryController
+	presencecontroller        controller.PresenceController
 }
 
 func NewRoutes(
 	auth controller.AuthController,
+	presencehistory controller.PresenceHistoryController,
 	presence controller.PresenceController,
 ) Routes {
 	return &routes{
-		authController:     auth,
-		presenceController: presence,
+		authController:            auth,
+		presenceHistoryController: presencehistory,
+		presencecontroller:        presence,
 	}
 }
 
@@ -32,8 +35,14 @@ func (r *routes) SetupRoutes(router *gin.Engine) {
 		auth.POST("/login", r.authController.Login)
 	}
 
+	// Create Presence
 	presence := router.Group("/presence")
 	{
-		presence.GET("", r.presenceController.GetPresenceByEmail)
+		presence.POST("", r.presencecontroller.CreatePresence)
+	}
+
+	presenceHistory := router.Group("/presence/history")
+	{
+		presenceHistory.GET("", r.presenceHistoryController.GetPresenceByEmail)
 	}
 }
