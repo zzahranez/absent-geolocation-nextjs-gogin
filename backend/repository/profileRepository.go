@@ -8,6 +8,7 @@ import (
 
 type ProfileRepository interface {
 	QueryFindUserAccountByEmail(employeeID uint) (*model.User, error)
+	QueryFindBiodataUserByEmail(employeeID uint) (*model.Profile, error)
 }
 
 type profilerepository struct {
@@ -27,4 +28,13 @@ func (r *profilerepository) QueryFindUserAccountByEmail(employeeID uint) (*model
 	}
 
 	return &user, nil
+}
+
+func (r *profilerepository) QueryFindBiodataUserByEmail(employeeID uint) (*model.Profile, error) {
+	var profile model.Profile
+	if err := r.db.Preload("User").Where("user_id = ?", employeeID).First(&profile).Error; err != nil {
+		return nil, err
+	}
+
+	return &profile, nil
 }

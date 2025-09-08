@@ -26,5 +26,10 @@ func InjecRepository(db *gorm.DB) Routes {
 	presenceSerice := service.NewPresenceService(presenceRepo, usersRepo)
 	presenceController := controller.NewPresenceController(presenceSerice)
 
-	return NewRoutes(authController, presenceHistoryController, presenceController)
+	// profile
+	profileRepo := repository.NewProfileRepository(db)
+	profileService := service.NewProfileService(profileRepo, usersRepo)
+	profileController := controller.NewProfileController(profileService)
+
+	return NewRoutes(authController, presenceHistoryController, presenceController, profileController)
 }
