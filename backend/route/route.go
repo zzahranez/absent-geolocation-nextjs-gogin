@@ -15,6 +15,7 @@ type routes struct {
 	presenceHistoryController controller.PresenceHistoryController
 	presencecontroller        controller.PresenceController
 	profilecontroller         controller.ProfileController
+	cuticontroller            controller.CutiController
 }
 
 func NewRoutes(
@@ -22,12 +23,14 @@ func NewRoutes(
 	presencehistory controller.PresenceHistoryController,
 	presence controller.PresenceController,
 	profile controller.ProfileController,
+	cuti controller.CutiController,
 ) Routes {
 	return &routes{
 		authController:            auth,
 		presenceHistoryController: presencehistory,
 		presencecontroller:        presence,
 		profilecontroller:         profile,
+		cuticontroller:            cuti,
 	}
 }
 
@@ -47,6 +50,12 @@ func (r *routes) SetupRoutes(router *gin.Engine) {
 	presenceHistory := router.Group("/presence/history")
 	{
 		presenceHistory.GET("", r.presenceHistoryController.GetPresenceByEmail)
+	}
+
+	// Cuti
+	cuti := router.Group("/cuti")
+	{
+		cuti.POST("/create", r.cuticontroller.CreateCuti)
 	}
 
 	profile := router.Group("/profile")
